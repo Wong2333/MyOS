@@ -129,12 +129,15 @@ p_mode_start:
                                                       
     lgdt [gdt_ptr]                                      ;在开启分页后,用gdt新的地址重新加载
 
+    mov byte [gs:160], 'V'                              ;视频段段基址已经被更新,用字符v表示virtual addr
+
+    jmp $
 
 
 enter_kernel:    
     call kernel_init
     mov esp, 0xc009f000                                 ;视频段段基址已经被更新,用字符v表示virtual addr
-
+    
     jmp KERNEL_ENTRY_POINT                              ; 用地址0x1500访问测试，结果ok
 
 
