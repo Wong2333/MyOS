@@ -1,7 +1,6 @@
 %include "boot.inc"
 section loader vstart=LOADER_BASE_ADDR
 LOADER_STACK_TOP equ LOADER_BASE_ADDR
-    jmp loader_start					                ;loader一进来是一大堆GDT段描述符数据，无法执行，所以要跳过
    
                                                         
 GDT_BASE:                                               ;构建gdt及其内部的描述符
@@ -91,7 +90,7 @@ loader_start:
                                                         ;jmp dword SELECTOR_CODE:p_mode_start	    
     jmp  SELECTOR_CODE:p_mode_start	                    ; 刷新流水线，避免分支预测的影响,这种cpu优化策略，最怕jmp跳转，
 					                                    ; 这将导致之前做的预测失效，从而起到了刷新的作用。
-                                                        
+
 .error_hlt:		                                        ;出错则挂起
     hlt
 
