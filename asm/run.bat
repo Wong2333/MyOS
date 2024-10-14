@@ -1,1 +1,0 @@
-D:\Bochs-2.8/bochs -f D:\Bochs-2.8/bochsrc
