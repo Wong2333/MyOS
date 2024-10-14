@@ -104,6 +104,12 @@ p_mode_start:
     mov ax,SELECTOR_VIDEO
     mov gs,ax
 
+                                                            ; -------------------------   加载kernel  ----------------------
+    mov eax, KERNEL_START_SECTOR                        ; kernel.bin所在的扇区号
+    mov ebx, KERNEL_BIN_BASE_ADDR                       ; 从磁盘读出后，写入到ebx指定的地址
+    mov ecx, 200			                            ; 读入的扇区数
+    call rd_disk_m_32
+
     call setup_page                                     ;创建页目录表的函数,我们的页目录表必须放在1M开始的位置，所以必须在开启保护模式后运行
 
                                                         ;以下两句是将gdt描述符中视频段描述符中的段基址+0xc0000000
@@ -123,12 +129,6 @@ p_mode_start:
                                                       
     lgdt [gdt_ptr]                                      ;在开启分页后,用gdt新的地址重新加载
 
-
-                                                        ; -------------------------   加载kernel  ----------------------
-    mov eax, KERNEL_START_SECTOR                        ; kernel.bin所在的扇区号
-    mov ebx, KERNEL_BIN_BASE_ADDR                       ; 从磁盘读出后，写入到ebx指定的地址
-    mov ecx, 200			                            ; 读入的扇区数
-    call rd_disk_m_32
 
 
 enter_kernel:    
