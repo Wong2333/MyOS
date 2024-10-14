@@ -133,10 +133,7 @@ p_mode_start:
 
 enter_kernel:    
     call kernel_init
-    mov esp, 0xc009f000
-    mov byte [gs:160], 'V'                              ;视频段段基址已经被更新,用字符v表示virtual addr
-
-    jmp $
+    mov esp, 0xc009f000                                 ;视频段段基址已经被更新,用字符v表示virtual addr
 
     jmp KERNEL_ENTRY_POINT                              ; 用地址0x1500访问测试，结果ok
 
