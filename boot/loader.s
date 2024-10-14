@@ -28,33 +28,45 @@ VIDEO_DESC:
     SELECTOR_VIDEO equ (0x0003<<3) + TI_GDT + RPL0	    ; 同上 
 gdt_ptr dw GDT_LIMIT                                    ;定义加载进入GDTR的数据，前2字节是gdt界限，后4字节是gdt起始地址，
 	    dd  GDT_BASE
-loadermsg db '2 loader in real.'
+
+total_mem_bytes dd 0				                    ; total_mem_bytes用于保存内存容量,以字节为单位,此位置比较好记。
+                                                        ; 当前偏移loader.bin文件头0x200字节,loader.bin的加载地址是0x900,
+                                                        ; 故total_mem_bytes内存中的地址是0xb00.将来在内核中咱们会引用此地址	
+
+ards_buf times 244 db 0                                 ;人工对齐total_mem_bytes4字节+gdt_ptr6字节+ards_buf244字节+ards_nr2,共256字节
+ards_nr dw 0		                                    ;用于记录ards结构体数量
 
 loader_start:
+                                                        ;-------  int 15h eax = 0000E820h ,edx = 534D4150h ('SMAP') 获取内存布局  -------
 
-                                                        ;------------------------------------------------------------
-                                                        ;INT 0x10    功能号:0x13    功能描述:打印字符串
-                                                        ;------------------------------------------------------------
-                                                        ;输入:
-                                                        ;AH 子功能号=13H
-                                                        ;BH = 页码
-                                                        ;BL = 属性(若AL=00H或01H)
-                                                        ;CX＝字符串长度
-                                                        ;(DH、DL)＝坐标(行、列)
-                                                        ;ES:BP＝字符串地址 
-                                                        ;AL＝显示输出方式
-                                                        ;   0——字符串中只含显示字符，其显示属性在BL中。显示后，光标位置不变
-                                                        ;   1——字符串中只含显示字符，其显示属性在BL中。显示后，光标位置改变
-                                                        ;   2——字符串中含显示字符和显示属性。显示后，光标位置不变
-                                                        ;   3——字符串中含显示字符和显示属性。显示后，光标位置改变
-                                                        ;无返回值
-    mov sp,LOADER_BASE_ADDR
-    mov	bp,loadermsg                                    ; ES:BP = 字符串地址
-    mov	cx,17			                                ; CX = 字符串长度
-    mov	ax,0x1301		                                ; AH = 13,  AL = 01h
-    mov	bx,0x001f		                                ; 页号为0(BH = 0) 蓝底粉红字(BL = 1fh)
-    mov	dx,0x1800		                                ;
-    int	0x10                                            ; 10h 号中断
+    xor ebx, ebx		                                ;第一次调用时，ebx值要为0
+    mov edx, 0x534d4150	                                ;edx只赋值一次，循环体中不会改变
+    mov di, ards_buf	                                ;ards结构缓冲区
+    .e820_mem_get_loop:	                                ;循环获取每个ARDS内存范围描述结构
+    mov eax, 0x0000e820	                                ;执行int 0x15后,eax值变为0x534d4150,所以每次执行int前都要更新为子功能号。
+    mov ecx, 20		                                    ;ARDS地址范围描述符结构大小是20字节
+    int 0x15
+    add di, cx		                                    ;使di增加20字节指向缓冲区中新的ARDS结构位置
+    inc word [ards_nr]	                                ;记录ARDS数量
+    cmp ebx, 0		                                    ;若ebx为0且cf不为1,这说明ards全部返回，当前已是最后一个
+    jnz .e820_mem_get_loop
+
+                                                        ;在所有ards结构中，找出(base_add_low + length_low)的最大值，即内存的容量。
+    mov cx, [ards_nr]	                                ;遍历每一个ARDS结构体,循环次数是ARDS的数量
+    mov ebx, ards_buf 
+    xor edx, edx		                                ;edx为最大的内存容量,在此先清0
+.find_max_mem_area:	                                    ;无须判断type是否为1,最大的内存块一定是可被使用
+    mov eax, [ebx]	                                    ;base_add_low
+    add eax, [ebx+8]	                                ;length_low
+    add ebx, 20		                                    ;指向缓冲区中下一个ARDS结构
+    cmp edx, eax		                                ;冒泡排序，找出最大,edx寄存器始终是最大的内存容量
+    jge .next_ards
+    mov edx, eax		                                ;edx为总内存大小
+.next_ards:
+    loop .find_max_mem_area
+
+    mov [total_mem_bytes], edx	                        ;将内存换为byte单位后存入total_mem_bytes处。
+
 
                                                         ;-----------------   准备进入保护模式   ------------------------------------------
                                                         ;1 打开A20
@@ -79,6 +91,9 @@ loader_start:
                                                         ;jmp dword SELECTOR_CODE:p_mode_start	    
     jmp  SELECTOR_CODE:p_mode_start	                    ; 刷新流水线，避免分支预测的影响,这种cpu优化策略，最怕jmp跳转，
 					                                    ; 这将导致之前做的预测失效，从而起到了刷新的作用。
+                                                        
+.error_hlt:		                                        ;出错则挂起
+    hlt
 
 [bits 32]
 p_mode_start:
