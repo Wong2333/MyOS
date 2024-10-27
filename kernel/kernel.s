@@ -4,7 +4,7 @@
 extern put_str			                    ;声明外部函数，为的是调用put_str
 
 section .data
-intr_str db "interrupt occur!", 0xa, 0       ;第二个是一个换行符，第三个定义一个ascii码为0的字符，用来表示字符串的结尾
+intr_str db "interrupt occur!", 0xa, 0      ;第二个是一个换行符，第三个定义一个ascii码为0的字符，用来表示字符串的结尾
 global intr_entry_table
 intr_entry_table:                           ;编译器会将之后所有同属性的section合成一个大的segment，所以这个标号后面会聚集所有的中断处理程序的地址
 
@@ -61,4 +61,3 @@ VECTOR 0x1d,ERROR_CODE
 VECTOR 0x1e,ERROR_CODE
 VECTOR 0x1f,ZERO 
 VECTOR 0x20,ZERO
-

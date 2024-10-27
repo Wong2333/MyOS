@@ -1,13 +1,15 @@
 #include "interrupt.h"      //里面定义了intr_handler类型
 #include "stdint.h"         //各种uint_t类型
-#include "global.h"         //里面定义了选择子         
+#include "global.h"         //里面定义了选择子
+#include "io.h"             
 #include "print.h"
-#include "io.h" //里面封装了一系列与端口操作的函数
+
 
 #define PIC_M_CTRL 0x20	       // 这里用的可编程中断控制器是8259A,主片的控制端口是0x20
 #define PIC_M_DATA 0x21	       // 主片的数据端口是0x21
 #define PIC_S_CTRL 0xa0	       // 从片的控制端口是0xa0
 #define PIC_S_DATA 0xa1	       // 从片的数据端口是0xa1
+
 
 #define IDT_DESC_CNT 0x21	   //支持的中断描述符个数33
 
@@ -26,24 +28,6 @@ static struct gate_desc idt[IDT_DESC_CNT];   //中断门描述符（结构体）
 
 extern intr_handler intr_entry_table[IDT_DESC_CNT];	    //引入kernel.s中定义好的中断处理函数地址数组，intr_handler就是void* 表明是一般地址类型
 
-//此函数用于将传入的中断门描述符与中断处理函数建立映射，三个参数：中断门描述符地址，属性，中断处理函数地址
-static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function) { 
-   p_gdesc->func_offset_low_word = (uint32_t)function & 0x0000FFFF;
-   p_gdesc->selector = SELECTOR_K_CODE;
-   p_gdesc->dcount = 0;
-   p_gdesc->attribute = attr;
-   p_gdesc->func_offset_high_word = ((uint32_t)function & 0xFFFF0000) >> 16;
-}
-
-//此函数用来循环调用make_idt_desc函数来完成中断门描述符与中断处理函数映射关系的建立,传入三个参数：中断描述符表某个中段描述符（一个结构体）的地址
-//属性字段，中断处理函数的地址
-static void idt_desc_init(void) {
-   int i;
-   for (i = 0; i < IDT_DESC_CNT; i++) {
-      make_idt_desc(&idt[i], IDT_DESC_ATTR_DPL0, intr_entry_table[i]); 
-   }
-   put_str("   idt_desc_init done\n");
-}
 
 
 /* 初始化可编程中断控制器8259A */
@@ -67,6 +51,28 @@ static void pic_init(void) {
 
    put_str("   pic_init done\n");
 }
+
+
+//此函数用于将传入的中断门描述符与中断处理函数建立映射，三个参数：中断门描述符地址，属性，中断处理函数地址
+static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function) { 
+   p_gdesc->func_offset_low_word = (uint32_t)function & 0x0000FFFF;
+   p_gdesc->selector = SELECTOR_K_CODE;
+   p_gdesc->dcount = 0;
+   p_gdesc->attribute = attr;
+   p_gdesc->func_offset_high_word = ((uint32_t)function & 0xFFFF0000) >> 16;
+}
+
+//此函数用来循环调用make_idt_desc函数来完成中断门描述符与中断处理函数映射关系的建立,传入三个参数：中断描述符表某个中段描述符（一个结构体）的地址
+//属性字段，中断处理函数的地址
+static void idt_desc_init(void) {
+   int i;
+   for (i = 0; i < IDT_DESC_CNT; i++) {
+      make_idt_desc(&idt[i], IDT_DESC_ATTR_DPL0, intr_entry_table[i]); 
+   }
+   put_str("   idt_desc_init done\n");
+}
+
+
 /*完成有关中断的所有初始化工作*/
 void idt_init() {
    put_str("idt_init start\n");
@@ -78,5 +84,3 @@ void idt_init() {
    asm volatile("lidt %0" : : "m" (idt_operand));
    put_str("idt_init done\n");
 }
-
-
