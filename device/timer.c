@@ -2,7 +2,7 @@
 #include "io.h"
 #include "print.h"
 
-#define IRQ0_FREQUENCY	    20    //定义我们想要的中断发生频率，100HZ                         
+#define IRQ0_FREQUENCY	    100    //定义我们想要的中断发生频率，100HZ                         
 #define INPUT_FREQUENCY	    1193180     //计数器0的工作脉冲信号评率
 #define COUNTER0_VALUE	    INPUT_FREQUENCY / IRQ0_FREQUENCY
 #define CONTRER0_PORT	    0x40        //要写入初值的计数器端口号
