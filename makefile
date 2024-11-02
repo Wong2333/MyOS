@@ -2,13 +2,14 @@
 BUILD_DIR=./build
 ENTRY_POINT=0xc0001500
 HD60M_PATH=./hd60M.img
+BOCHS_GDB=/home/wjm/bochs-gdb/bin
 #只需要把hd60m.img路径改成自己环境的路径，整个代码直接make all就完全写入了，能够运行成功
 AS=nasm
 CC=gcc
 LD=ld
 LIB= -I lib/ -I lib/kernel/ -I lib/user/ -I kernel/ -I device/
-ASFLAGS= -f elf
-CFLAGS= -Wall $(LIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -m32
+ASFLAGS= -f elf -g
+CFLAGS= -Wall $(LIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -m32 -g
 #-Wall warning wall的意思，产生尽可能多警告信息，-fno-builtin不要采用内部函数，
 #-W 会显示警告，但是只显示编译器认为会出现错误的警告
 #-Wstrict-prototypes 要求函数声明必须有参数类型，否则发出警告。-Wmissing-prototypes 必须要有函数声明，否则发出警告
@@ -36,7 +37,7 @@ OBJS:= $(patsubst %.s, %.o,$(OBJS))
 #顺序最好是调用在前，实现在后
 
 ######################编译两个启动文件的代码#####################################
-all:mk_dir boot build hd
+all:mk_dir boot build hd gdb_symbol
 
 
 $(BUILD_DIR)/boot/mbr.o:boot/mbr.s
@@ -66,6 +67,9 @@ $(HD60M_PATH):build/boot/mbr.o build/boot/loader.o $(BUILD_DIR)/kernel.bin
 	dd if=build/boot/loader.o of=$(HD60M_PATH) count=4 bs=512 seek=2 conv=notrunc && \
 	dd if=$(BUILD_DIR)/kernel.bin of=$(HD60M_PATH) bs=512 count=200 seek=9 conv=notrunc 
 
+$(BUILD_DIR)/kernel.sym:$(BUILD_DIR)/kernel.bin
+	objcopy --only-keep-debug $(BUILD_DIR)/kernel.bin $(BUILD_DIR)/kernel.sym
+
 mk_dir:
 	@if [ ! -d $(BUILD_DIR) ];then mkdir $(BUILD_DIR);fi
 	@if [ ! -d $(BUILD_DIR)/boot ];then mkdir $(BUILD_DIR)/boot; \
@@ -92,5 +96,11 @@ build:$(BUILD_DIR)/kernel.bin
 
 rebuild:clean all
 
-.PHONY:mk_dir hd clean build all boot print-txtfiles	#定义了6个伪目标
+gdb_symbol:$(BUILD_DIR)/kernel.sym
+
+gdb_run: all
+	echo '' | $(BOCHS_GDB)/bochs -f $(BOCHS_GDB)/bochsrc.disk & \
+	gdb -ex "target remote:1234" -ex "symbol-file $(shell pwd)/build/kernel.sym"
+
+.PHONY:mk_dir hd clean build all boot print-txtfiles gdb_run gdb_symbol	#定义了6个伪目标
 
