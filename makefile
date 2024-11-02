@@ -98,9 +98,12 @@ rebuild:clean all
 
 gdb_symbol:$(BUILD_DIR)/kernel.sym
 
-gdb_run: all
-	echo '' | $(BOCHS_GDB)/bochs -f $(BOCHS_GDB)/bochsrc.disk & \
+gdb: all
+	echo '' | $(BOCHS_GDB)/bochs -f $(BOCHS_GDB)/bochsrc_gdb.disk & \
 	gdb -ex "target remote:1234" -ex "symbol-file $(shell pwd)/build/kernel.sym"
 
-.PHONY:mk_dir hd clean build all boot print-txtfiles gdb_run gdb_symbol	#定义了6个伪目标
+bochs: all
+	echo '' | $(BOCHS_GDB)/bochs -f $(BOCHS_GDB)/bochsrc.disk
+
+.PHONY:mk_dir hd clean build all boot print-txtfiles gdb gdb_symbol bochs	#定义了6个伪目标
 
