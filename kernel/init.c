@@ -13,4 +13,5 @@ void init_all() {
    mem_init();	  // 初始化内存管理系统
    thread_init();
    timer_init();
+   console_init();
 }
