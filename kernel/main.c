@@ -12,17 +12,17 @@ int main(void) {
    put_str("I am kernel\n");
    init_all();
 
-   thread_start("k_thread_a", 1, k_thread_a, "argA");
-   thread_start("k_thread_b", 1, k_thread_b, "argB");
-   thread_start("k_thread_c", 1, k_thread_c, "argC");
+   // thread_start("k_thread_a", 1, k_thread_a, "argA");
+   // thread_start("k_thread_b", 1, k_thread_b, "argB");
+   // thread_start("k_thread_c", 1, k_thread_c, "argC");
    intr_enable();
    int i = 0;
-   while(1) {
-      console_put_str("argX");
-      // console_put_int(i);
-      // console_put_str(" ");
-      // i++;
-   };
+   while(1);// {
+   //    console_put_str("argX");
+   //    // console_put_int(i);
+   //    // console_put_str(" ");
+   //    // i++;
+   // };
    return 0;
 }
 

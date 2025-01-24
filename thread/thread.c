@@ -156,6 +156,8 @@ void thread_block(enum task_status stat) {
 /* 待当前线程被解除阻塞后才继续运行下面的intr_set_status */
    intr_set_status(old_status);
 }
+
+
 /* 将线程pthread解除阻塞 */
 void thread_unblock(struct task_struct* pthread) {
    enum intr_status old_status = intr_disable();      //涉及队就绪队列的修改，此时绝对不能被切换走
@@ -170,3 +172,4 @@ void thread_unblock(struct task_struct* pthread) {
    } 
    intr_set_status(old_status);
 }
+
