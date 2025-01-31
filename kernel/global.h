@@ -83,6 +83,13 @@ struct gdt_desc {
 
 #define PG_SIZE 4096
 
+#define DIV_ROUND_UP(X, STEP) ((X + STEP - 1) / (STEP))  //用于向上取整的宏，如9/10=1
+//定义eflages寄存器用的一些字段，含义见书p511
+#define EFLAGS_MBS	(1 << 1)	// 此项必须要设置
+#define EFLAGS_IF_1	(1 << 9)	// if为1,开中断
+#define EFLAGS_IF_0	0		// if为0,关中断
+#define EFLAGS_IOPL_3	(3 << 12)	// IOPL3,用于测试用户程序在非系统调用下进行IO
+#define EFLAGS_IOPL_0	(0 << 12)	// IOPL0
 
 
 #endif
