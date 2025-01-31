@@ -7,6 +7,7 @@
 /* 临时为测试添加 */
 #include "ioqueue.h"
 #include "keyboard.h"
+#include "global.h"
 
 void k_thread_a(void*);
 void k_thread_b(void*);

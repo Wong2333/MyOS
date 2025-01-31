@@ -8,7 +8,8 @@
                 "${workspaceFolder}/lib/kernel",
                 "${workspaceFolder}/lib/user",
                 "${workspaceFolder}/device",
-                "${workspaceFolder}/thread"
+                "${workspaceFolder}/thread",
+                "${workspaceFolder}/userprog"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc-4.6",

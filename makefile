@@ -7,7 +7,7 @@ BOCHS_GDB=/home/wjm/bochs-gdb/bin
 AS=nasm
 CC=gcc
 LD=ld
-LIB= -I lib/ -I lib/kernel/ -I lib/user/ -I kernel/ -I device/ -I thread/
+LIB= -I lib/ -I lib/kernel/ -I lib/user/ -I kernel/ -I device/ -I thread/ -I userprog/
 ASFLAGS= -f elf -g
 CFLAGS= -Wall $(LIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -m32 -g
 #-Wall warning wall的意思，产生尽可能多警告信息，-fno-builtin不要采用内部函数，
@@ -18,7 +18,8 @@ LDFLAGS= -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)/kernel.map -m elf_i386
 #-Map,生成map文件，就是通过编译器编译之后，生成的程序、数据及IO空间信息的一种映射文件
 #里面包含函数大小，入口地址等一些重要信息
 
-SOURCE_C= $(wildcard ./device/*.c ./kernel/*.c ./lib/kernel/*.c ./thread/*.c)
+INCLUDE_FILE= $(wildcard ./device/*.h ./kernel/*.h ./lib/kernel/*.h ./thread/*.h ./userprog/*.h)
+SOURCE_C= $(wildcard ./device/*.c ./kernel/*.c ./lib/kernel/*.c ./thread/*.c ./userprog/*.c)
 SOURCE_S= $(wildcard ./kernel/*.s ./lib/kernel/*.s ./thread/*.s)
 
 SOURCE_C:= ./kernel/main.c $(filter-out ./kernel/main.c,$(SOURCE_C))

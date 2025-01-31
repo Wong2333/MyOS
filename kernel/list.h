@@ -34,7 +34,7 @@ struct list_elem* list_pop(struct list* plist);
 bool elem_find(struct list* plist, struct list_elem* obj_elem);
 int list_empty(struct list* list);
 uint32_t list_len(struct list* list);
-struct list* list_traversal(struct list* list,function func,int arg);
+struct list_elem* list_traversal(struct list* list,function func,int arg);
 
 #endif
 
