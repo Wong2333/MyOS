@@ -19,7 +19,7 @@ LDFLAGS= -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)/kernel.map -m elf_i386
 #里面包含函数大小，入口地址等一些重要信息
 
 INCLUDE_FILE= $(wildcard ./device/*.h ./kernel/*.h ./lib/kernel/*.h ./thread/*.h ./userprog/*.h)
-SOURCE_C= $(wildcard ./device/*.c ./kernel/*.c ./lib/kernel/*.c ./thread/*.c ./userprog/*.c)
+SOURCE_C= $(wildcard ./device/*.c ./kernel/*.c ./lib/kernel/*.c ./lib/user/*.c ./thread/*.c ./userprog/*.c)
 SOURCE_S= $(wildcard ./kernel/*.s ./lib/kernel/*.s ./thread/*.s)
 
 SOURCE_C:= ./kernel/main.c $(filter-out ./kernel/main.c,$(SOURCE_C))

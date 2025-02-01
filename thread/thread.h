@@ -6,7 +6,7 @@
                                 //定义一种叫thread_fun的函数类型，该类型返回值是空，参数是一个地址(这个地址用来指向自己的参数)。
                                 //这样定义，这个类型就能够具有很大的通用性，很多函数都是这个类型
 typedef void thread_func(void*);
-
+typedef uint16_t pid_t;
                                 /* 进程或线程的状态 */
 enum task_status {
    TASK_RUNNING,
@@ -73,6 +73,7 @@ struct thread_stack {
                                     /* 进程或线程的pcb,程序控制块, 此结构体用于存储线程的管理信息*/
 struct task_struct {
    uint32_t* self_kstack;	        // 用于存储线程的栈顶位置，栈顶放着线程要用到的运行信息
+   pid_t pid;
    enum task_status status;
    uint8_t priority;		        // 线程优先级
    char name[16];                   //用于存储自己的线程的名字
@@ -85,6 +86,9 @@ struct task_struct {
    struct virtual_addr userprog_vaddr;   // 用户进程的虚拟内存池
    uint32_t stack_magic;	       //如果线程的栈无限生长，总会覆盖地pcb的信息，那么需要定义个边界数来检测是否栈已经到了PCB的边界
 };
+
+extern struct list thread_ready_list;
+extern struct list thread_all_list;
 
 void thread_create(struct task_struct* pthread, thread_func function, void* func_arg);
 void init_thread(struct task_struct* pthread, char* name, int prio);

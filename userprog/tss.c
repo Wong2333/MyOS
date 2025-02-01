@@ -57,7 +57,7 @@ static struct gdt_desc make_gdt_desc(uint32_t* desc_addr, uint32_t limit, uint8_
 /* 在gdt中创建tss并重新加载gdt */
 void tss_init() {
    put_str("tss_init start\n");
-   uint32_t tss_size = sizeof(tss);
+   uint16_t tss_size = (uint16_t)sizeof(tss);
    memset(&tss, 0, tss_size);
    tss.ss0 = SELECTOR_K_STACK;
    tss.io_base = tss_size;

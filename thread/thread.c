@@ -7,6 +7,7 @@
 #include "interrupt.h"
 #include "print.h"
 #include "list.h"
+#include "sync.h"
 
 #define PG_SIZE 4096
 
@@ -16,6 +17,19 @@ struct task_struct* main_thread;    // 主线程PCB
 struct list thread_ready_list;	    // 就绪队列
 struct list thread_all_list;	    // 所有任务队列
 static struct list_elem* thread_tag;// 用于保存队列中的线程结点
+
+
+struct lock pid_lock;		    // 分配pid锁
+
+/* 分配pid */
+static pid_t allocate_pid(void) {
+   static pid_t next_pid = 0;
+   lock_acquire(&pid_lock);
+   next_pid++;
+   lock_release(&pid_lock);
+   return next_pid;
+}
+
 
 /* 获取当前线程pcb指针 */
 struct task_struct* running_thread() {
@@ -57,6 +71,7 @@ void thread_create(struct task_struct* pthread, thread_func function, void* func
 /* 初始化线程基本信息 , pcb中存储的是线程的管理信息，此函数用于根据传入的pcb的地址，线程的名字等来初始化线程的管理信息*/
 void init_thread(struct task_struct* pthread, char* name, int prio) {
    memset(pthread, 0, sizeof(*pthread));                                //把pcb初始化为0
+   pthread->pid = allocate_pid();
    strcpy(pthread->name, name);                                         //将传入的线程的名字填入线程的pcb中
    if(pthread == main_thread){
       pthread->status = TASK_RUNNING;     //由于把main函数也封装成一个线程,并且它一直是运行的,故将其直接设为TASK_RUNNING */  
@@ -101,7 +116,7 @@ static void make_main_thread(void) {
 /* 因为main线程早已运行,咱们在loader.S中进入内核时的mov esp,0xc009f000,
 就是为其预留了tcb,地址为0xc009e000,因此不需要通过get_kernel_page另分配一页*/
    main_thread = running_thread();
-   init_thread(main_thread, "main", 4);
+   init_thread(main_thread, "main", 41);
 
 /* main函数是当前线程,当前线程不在thread_ready_list中,
  * 所以只将其加在thread_all_list中. */
@@ -140,6 +155,7 @@ void thread_init(void) {
    put_str("thread_init start\n");
    list_init(&thread_ready_list);
    list_init(&thread_all_list);
+   lock_init(&pid_lock);
 /* 将当前main函数创建为线程 */
    make_main_thread();
    put_str("thread_init done\n");

@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "interrupt.h": "c",
-        "global.h": "c"
+        "global.h": "c",
+        "thread.h": "c"
     }
 }

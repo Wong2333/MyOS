@@ -40,8 +40,8 @@ extern void intr_exit(void);
 void start_process(void* filename_) {
    void* function = filename_;
    struct task_struct* cur = running_thread();
-   cur->self_kstack = (uint32_t*)((int)cur->self_kstack + sizeof(struct thread_stack)); //当我们进入到这里的时候，cur->self_kstack指向thread_stack的起始地址，跳过这里，才能设置intr_stack
-   struct intr_stack* proc_stack = (struct intr_stack*)cur->self_kstack;
+   cur->self_kstack += sizeof(struct thread_stack); //当我们进入到这里的时候，cur->self_kstack指向thread_stack的起始地址，跳过这里，才能设置intr_stack
+   struct intr_stack* proc_stack = (struct intr_stack*)cur->self_kstack;	 
    proc_stack->edi = proc_stack->esi = proc_stack->ebp = proc_stack->esp_dummy = 0;
    proc_stack->ebx = proc_stack->edx = proc_stack->ecx = proc_stack->eax = 0;
    proc_stack->gs = 0;		 //用户态根本用不上这个，所以置为0（gs我们一般用于访问显存段，这个让内核态来访问）
@@ -68,6 +68,8 @@ void page_dir_activate(struct task_struct* p_thread) {
    uint32_t pagedir_phy_addr = 0x100000;  // 默认为内核的页目录物理地址,也就是内核线程所用的页目录表
    if (p_thread->pgdir != NULL)	{    //如果不为空，说明要调度的是个进程，那么就要执行加载页表，所以先得到进程页目录表的物理地址
         pagedir_phy_addr = addr_v2p((uint32_t)p_thread->pgdir);
+        console_put_int(pagedir_phy_addr);
+        console_put_char('\n');
    }
    asm volatile ("movl %0, %%cr3" : : "r" (pagedir_phy_addr) : "memory");   //更新页目录寄存器cr3,使新页表生效
 }

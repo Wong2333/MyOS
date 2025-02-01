@@ -17,4 +17,5 @@ void init_all() {
    console_init();
    keyboard_init();
    tss_init();
+   syscall_init();   // 初始化系统调用
 }
