@@ -68,8 +68,6 @@ void page_dir_activate(struct task_struct* p_thread) {
    uint32_t pagedir_phy_addr = 0x100000;  // 默认为内核的页目录物理地址,也就是内核线程所用的页目录表
    if (p_thread->pgdir != NULL)	{    //如果不为空，说明要调度的是个进程，那么就要执行加载页表，所以先得到进程页目录表的物理地址
         pagedir_phy_addr = addr_v2p((uint32_t)p_thread->pgdir);
-        console_put_int(pagedir_phy_addr);
-        console_put_char('\n');
    }
    asm volatile ("movl %0, %%cr3" : : "r" (pagedir_phy_addr) : "memory");   //更新页目录寄存器cr3,使新页表生效
 }

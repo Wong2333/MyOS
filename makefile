@@ -9,7 +9,8 @@ CC=gcc
 LD=ld
 LIB= -I lib/ -I lib/kernel/ -I lib/user/ -I kernel/ -I device/ -I thread/ -I userprog/
 ASFLAGS= -f elf -g
-CFLAGS= -Wall $(LIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -m32 -g
+CFLAGS= -Wall $(LIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -m32 -g \
+-fno-stack-protector
 #-Wall warning wall的意思，产生尽可能多警告信息，-fno-builtin不要采用内部函数，
 #-W 会显示警告，但是只显示编译器认为会出现错误的警告
 #-Wstrict-prototypes 要求函数声明必须有参数类型，否则发出警告。-Wmissing-prototypes 必须要有函数声明，否则发出警告
@@ -19,7 +20,7 @@ LDFLAGS= -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)/kernel.map -m elf_i386
 #里面包含函数大小，入口地址等一些重要信息
 
 INCLUDE_FILE= $(wildcard ./device/*.h ./kernel/*.h ./lib/kernel/*.h ./thread/*.h ./userprog/*.h)
-SOURCE_C= $(wildcard ./device/*.c ./kernel/*.c ./lib/kernel/*.c ./lib/user/*.c ./thread/*.c ./userprog/*.c)
+SOURCE_C= $(wildcard ./device/*.c ./kernel/*.c ./lib/*.c ./lib/kernel/*.c ./lib/user/*.c ./thread/*.c ./userprog/*.c)
 SOURCE_S= $(wildcard ./kernel/*.s ./lib/kernel/*.s ./thread/*.s)
 
 SOURCE_C:= ./kernel/main.c $(filter-out ./kernel/main.c,$(SOURCE_C))

@@ -51,14 +51,11 @@
 
 /* 返回当前任务pid */
 uint32_t getpid() {
-   return ({				       \
-   int retval;					               \
-   asm volatile (					       \
-   "int $0x80"						       \
-   : "=a" (retval)					       \
-   : "a" (SYS_GETPID)					       \
-   : "memory"						       \
-   );							       \
-   retval;						       \
-});
+   return _syscall0(SYS_GETPID);
 }
+
+/* 打印字符串str */
+uint32_t write(char* str) {
+   return _syscall1(SYS_WRITE, str);
+}
+
