@@ -40,7 +40,7 @@ extern void intr_exit(void);
 void start_process(void* filename_) {
    void* function = filename_;
    struct task_struct* cur = running_thread();
-   cur->self_kstack += sizeof(struct thread_stack); //当我们进入到这里的时候，cur->self_kstack指向thread_stack的起始地址，跳过这里，才能设置intr_stack
+   cur->self_kstack = (uint32_t*)((int)cur->self_kstack + sizeof(struct thread_stack)); //当我们进入到这里的时候，cur->self_kstack指向thread_stack的起始地址，跳过这里，才能设置intr_stack
    struct intr_stack* proc_stack = (struct intr_stack*)cur->self_kstack;	 
    proc_stack->edi = proc_stack->esi = proc_stack->ebp = proc_stack->esp_dummy = 0;
    proc_stack->ebx = proc_stack->edx = proc_stack->ecx = proc_stack->eax = 0;
@@ -93,6 +93,7 @@ void process_execute(void* filename, char* name) {
     create_user_vaddr_bitmap(thread);
     thread_create(thread, start_process, filename);
     thread->pgdir = create_page_dir();
+    block_desc_init(thread->u_block_desc); //初始化用户进程的文件描述符表
     
     enum intr_status old_status = intr_disable();
     ASSERT(!elem_find(&thread_ready_list, &thread->general_tag));
