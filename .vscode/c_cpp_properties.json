@@ -4,17 +4,17 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/kernel",
-                "${workspaceFolder}/lib",
+                "${workspaceFolder}/lib/",
                 "${workspaceFolder}/lib/kernel",
                 "${workspaceFolder}/lib/user",
                 "${workspaceFolder}/device",
                 "${workspaceFolder}/thread",
-                "${workspaceFolder}/userprog"
+                "${workspaceFolder}/userprog",
+                "${workspaceFolder}/fs",
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc-4.6",
             "cStandard": "c99",
-            "cppStandard": "c++14",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],

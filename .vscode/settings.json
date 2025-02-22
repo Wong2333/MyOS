@@ -3,6 +3,7 @@
         "interrupt.h": "c",
         "global.h": "c",
         "thread.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "memory.h": "c"
     }
 }

@@ -17,7 +17,7 @@ void u_prog_b(void);
 int main(void) {
    put_str("I am kernel\n");
    init_all();
-   intr_enable();
+   while(1);
    process_execute(u_prog_a, "u_prog_a");
    process_execute(u_prog_b, "u_prog_b");
    thread_start("k_thread_a", 31, k_thread_a, "I am thread_a");
@@ -39,8 +39,8 @@ void k_thread_a(void* arg) {
    console_put_int((int)addr3);
    console_put_char('\n');
 
-   // int cpu_delay = 9999999;
-   // while(cpu_delay-- > 0);
+   int cpu_delay = 100000;
+   while(cpu_delay-- > 0);
    sys_free(addr1);
    sys_free(addr2);
    sys_free(addr3);
@@ -49,8 +49,6 @@ void k_thread_a(void* arg) {
 
 /* 在线程中运行的函数 */
 void k_thread_b(void* arg) {     
-   int cpu_delay = 999999;
-   while(cpu_delay-- > 0);
    void* addr1 = sys_malloc(256);
    void* addr2 = sys_malloc(255);
    void* addr3 = sys_malloc(254);
@@ -62,6 +60,8 @@ void k_thread_b(void* arg) {
    console_put_int((int)addr3);
    console_put_char('\n');
 
+   int cpu_delay = 100000;
+   while(cpu_delay-- > 0);
    sys_free(addr1);
    sys_free(addr2);
    sys_free(addr3);
