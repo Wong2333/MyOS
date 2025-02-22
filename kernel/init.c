@@ -20,4 +20,5 @@ void init_all() {
    tss_init();
    syscall_init();   // 初始化系统调用
    ide_init();	     // 初始化硬盘
+   filesys_init();   // 初始化文件系统
 }
