@@ -4,6 +4,9 @@
         "global.h": "c",
         "thread.h": "c",
         "stdio.h": "c",
-        "memory.h": "c"
+        "memory.h": "c",
+        "ide.h": "c",
+        "sync.h": "c",
+        "stdio-kernel.h": "c"
     }
 }

@@ -80,26 +80,43 @@ void thread_create(struct task_struct* pthread, thread_func function, void* func
 }
 
 /* 初始化线程基本信息 , pcb中存储的是线程的管理信息，此函数用于根据传入的pcb的地址，线程的名字等来初始化线程的管理信息*/
-void init_thread(struct task_struct* pthread, char* name, int prio) {
-   memset(pthread, 0, sizeof(*pthread));                                //把pcb初始化为0
-   pthread->pid = allocate_pid();
-   strcpy(pthread->name, name);                                         //将传入的线程的名字填入线程的pcb中
-   if(pthread == main_thread){
-      pthread->status = TASK_RUNNING;     //由于把main函数也封装成一个线程,并且它一直是运行的,故将其直接设为TASK_RUNNING */  
-   } 
-   else{
-      pthread->status = TASK_READY;
-   }
+void init_thread(struct task_struct *pthread, char *name, int prio)
+{
+    memset(pthread, 0, sizeof(*pthread)); // 把pcb初始化为0
+    pthread->pid = allocate_pid();
+    strcpy(pthread->name, name); // 将传入的线程的名字填入线程的pcb中
 
-   pthread->priority = prio;            
-   pthread->ticks = prio;
-   pthread->elapsed_ticks = 0;
-   pthread->pgdir = NULL;	//线程没有自己的地址空间，进程的pcb这一项才有用，指向自己的页表虚拟地址	
-                                                                        /* self_kstack是线程自己在内核态下使用的栈顶地址 */
-   pthread->self_kstack = (uint32_t*)((uint32_t)pthread + PG_SIZE);     //本操作系统比较简单，线程不会太大，就将线程栈顶定义为pcb地址
-                                                                        //+4096的地方，这样就留了一页给线程的信息（包含管理信息与运行信息）空间
-   pthread->stack_magic = 0x19870916;	                                // /定义的边界数字，随便选的数字来判断线程的栈是否已经生长到覆盖pcb信息了              
+    if (pthread == main_thread)
+    {
+        pthread->status = TASK_RUNNING; // 由于把main函数也封装成一个线程,并且它一直是运行的,故将其直接设为TASK_RUNNING */
+    }
+    else
+    {
+        pthread->status = TASK_READY;
+    }
+    pthread->priority = prio;
+    /* self_kstack是线程自己在内核态下使用的栈顶地址 */
+    pthread->ticks = prio;
+    pthread->elapsed_ticks = 0;
+    pthread->pgdir = NULL;                                            // 线程没有自己的地址空间，进程的pcb这一项才有用，指向自己的页表虚拟地址
+    pthread->self_kstack = (uint32_t *)((uint32_t)pthread + PG_SIZE); // 本操作系统比较简单，线程不会太大，就将线程栈顶定义为pcb地址
+                                                                      //+4096的地方，这样就留了一页给线程的信息（包含管理信息与运行信息）空间
+    /* 标准输入输出先空出来 */
+    pthread->fd_table[0] = 0;
+    pthread->fd_table[1] = 1;
+    pthread->fd_table[2] = 2;
+    /* 其余的全置为-1 */
+    uint8_t fd_idx = 3;
+    while (fd_idx < MAX_FILES_OPEN_PER_PROC)
+    {
+        pthread->fd_table[fd_idx] = -1;
+        fd_idx++;
+    }
+    pthread->cwd_inode_nr = 0;         // 以根目录做为默认工作路径
+    pthread->parent_pid = -1;          // -1表示没有父进程
+    pthread->stack_magic = 0x19870916; // 定义的边界数字，随便选的数字来判断线程的栈是否已经生长到覆盖pcb信息了
 }
+
 
 /* 创建一优先级为prio的线程,线程名为name,线程所执行的函数是function(func_arg) */
 struct task_struct* thread_start(char* name, int prio, thread_func function, void* func_arg) {
