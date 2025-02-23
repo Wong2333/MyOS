@@ -183,18 +183,23 @@ void schedule() {
    switch_to(cur, next);
 }
 
+extern void init(void);
 /* 初始化线程环境 */
-void thread_init(void) {
-   put_str("thread_init start\n");
-   list_init(&thread_ready_list);
-   list_init(&thread_all_list);
-   lock_init(&pid_lock);
-   /* 将当前main函数创建为线程 */
-   make_main_thread();
-   /* 创建idle线程 */
-   idle_thread = thread_start("idle", 10, idle, NULL);
-   put_str("thread_init done\n");
+void thread_init(void)
+{
+    put_str("thread_init start\n");
+    list_init(&thread_ready_list);
+    list_init(&thread_all_list);
+    lock_init(&pid_lock);
+    /* 先创建第一个用户进程:init */
+    process_execute(init, "init");         // 放在第一个初始化,这是第一个进程,init进程的pid为1
+    /* 将当前main函数创建为线程 */
+    make_main_thread();
+    /* 创建idle线程 */
+    idle_thread = thread_start("idle", 10, idle, NULL);
+    put_str("thread_init done\n");
 }
+
 
 
 //将当前正在运行的线程pcb中的状态字段设定为传入的status,一般用于线程主动设定阻塞
@@ -237,4 +242,12 @@ void thread_yield(void) {
    cur->status = TASK_READY;
    schedule();
    intr_set_status(old_status);
+}
+
+
+/* fork进程时为其分配pid,因为allocate_pid已经是静态的,别的文件无法调用.
+不想改变函数定义了,故定义fork_pid函数来封装一下。*/
+pid_t fork_pid(void)
+{
+    return allocate_pid();
 }

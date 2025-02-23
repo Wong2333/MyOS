@@ -70,3 +70,11 @@ void* malloc(uint32_t size) {
 void free(void* ptr) {
    _syscall1(SYS_FREE, ptr);
 }
+
+#include "thread.h"
+
+/* 派生子进程,返回子进程pid */
+pid_t fork(void)
+{
+    return _syscall0(SYS_FORK);
+}
